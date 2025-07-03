@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Roots - Tribal Horror Game</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(139, 0, 0, 0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .title {
+            font-size: 2.5em;
+            color: #8b0000;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            margin: 0;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        
+        .game-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .panel {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .panel h3 {
+            color: #8b0000;
+            margin-top: 0;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+        
+        .resource-bar {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 5px;
+            background: rgba(40, 40, 40, 0.6);
+            border-radius: 4px;
+        }
+        
+        .resource-name {
+            font-weight: bold;
+        }
+        
+        .resource-amount {
+            color: #90EE90;
+        }
+        
+        .tribe-member {
+            background: rgba(60, 60, 60, 0.6);
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 3px solid #4a4a4a;
+        }
+        
+        .tribe-member.missing {
+            border-left-color: #8b0000;
+            background: rgba(139, 0, 0, 0.2);
+        }
+        
+        .tribe-member.dead {
+            border-left-color: #444;
+            background: rgba(40, 40, 40, 0.4);
+            opacity: 0.7;
+        }
+        
+        .event-log {
+            height: 200px;
+            overflow-y: auto;
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid #333;
+            padding: 10px;
+            font-size: 0.9em;
+            border-radius: 4px;
+        }
+        
+        .event {
+            margin: 5px 0;
+            padding: 3px 0;
+        }
+        
+        .event.horror {
+            color: #ff6b6b;
+        }
+        
+        .event.warning {
+            color: #ffa500;
+        }
+        
+        .event.info {
+            color: #87ceeb;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: #8b0000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #a00000;
+        }
+        
+        button:disabled {
+            background: #444;
+            cursor: not-allowed;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .stat-box {
+            background: rgba(40, 40, 40, 0.6);
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .danger-meter {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .danger-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #90EE90, #ffa500, #ff6b6b);
+            transition: width 0.5s ease;
+        }
+        
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .flicker {
+            animation: flicker 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 class="title">DARK ROOTS</h1>
+            <p class="subtitle">Something stirs in the ancient woods...</p>
+        </div>
+        
+        <div class="game-grid">
+            <div class="panel">
+                <h3>Resources</h3>
+                <div class="resource-bar">
+                    <span class="resource-name">Food</span>
+                    <span class="resource-amount" id="food">0</span>
+                </div>
+                <div class="resource-bar">
+                    <span class="resource-name">Wood</span>
+                    <span class="resource-amount" id="wood">0</span>
+                </div>
+                <div class="resource-bar">
+                    <span class="resource-name">Stone</span>
+                    <span class="resource-amount" id="stone">0</span>
+                </div>
+                <div class="resource-bar">
+                    <span class="resource-name">Fear</span>
+                    <span class="resource-amount" id="fear" style="color: #ff6b6b;">0</span>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>Tribe Members</h3>
+                <div id="tribe-list">
+                    <!-- Tribe members will be populated here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h3>Events</h3>
+            <div class="event-log" id="event-log">
+                <div class="event info">The tribe settles near the edge of the dark forest...</div>
+                <div class="event warning">Strange sounds echo from the treeline at night.</div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <strong>Day</strong><br>
+                <span id="day">1</span>
+            </div>
+            <div class="stat-box">
+                <strong>Population</strong><br>
+                <span id="population">5</span>
+            </div>
+            <div class="stat-box">
+                <strong>Missing</strong><br>
+                <span id="missing" style="color: #ff6b6b;">0</span>
+            </div>
+            <div class="stat-box">
+                <strong>Danger Level</strong><br>
+                <div class="danger-meter">
+                    <div class="danger-fill" id="danger-fill" style="width: 10%"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="gatherFood()">Gather Food</button>
+            <button onclick="chopWood()">Chop Wood</button>
+            <button onclick="mineStone()">Mine Stone</button>
+            <button onclick="buildShelter()" id="shelter-btn">Build Shelter (10 Wood)</button>
+            <button onclick="buildWall()" id="wall-btn">Build Wall (15 Stone)</button>
+            <button onclick="sendScouts()" id="scout-btn">Send Scouts</button>
+            <button onclick="performRitual()" id="ritual-btn">Perform Ritual (5 Food)</button>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            resources: { food: 5, wood: 2, stone: 0, fear: 0 },
+            day: 1,
+            population: 5,
+            missing: 0,
+            danger: 10,
+            shelters: 0,
+            walls: 0,
+            tribeMembers: [
+                { name: "Kael", status: "alive", job: "gatherer" },
+                { name: "Mira", status: "alive", job: "hunter" },
+                { name: "Thorne", status: "alive", job: "builder" },
+                { name: "Vera", status: "alive", job: "scout" },
+                { name: "Orin", status: "alive", job: "elder" }
+            ],
+            events: [],
+            gameRunning: false
+        };
+
+        let horrorEvents = [
+            "Blood trails lead deeper into the forest...",
+            "The trees seem to whisper names of the missing.",
+            "Strange symbols carved into bark appear overnight.",
+            "A child's cry echoes from the forest depths.",
+            "The ground is soft and red near the old oak.",
+            "Shadows move between the trees in broad daylight.",
+            "The forest grows darker, branches reaching like claws.",
+            "Something large crashed through the underbrush last night.",
+            "The missing person's belongings are found, bloodstained.",
+            "Ancient roots burst from the ground, pulsing with malice."
+        ];
+
+        let scoutReports = [
+            "The scouts found claw marks on trees - massive ones.",
+            "A clearing filled with bones was discovered.",
+            "The scouts report seeing eyes watching from the canopy.",
+            "Strange fungi growing in humanoid shapes were found.",
+            "A scout returned speaking of 'walking trees' in the deep forest.",
+            "The patrol found a cave entrance sealed with human bones.",
+            "Scouts discovered a grove where no animals dare to tread.",
+            "The search party found clothing hanging from thorny branches."
+        ];
+
+        function updateDisplay() {
+            document.getElementById('food').textContent = gameState.resources.food;
+            document.getElementById('wood').textContent = gameState.resources.wood;
+            document.getElementById('stone').textContent = gameState.resources.stone;
+            document.getElementById('fear').textContent = gameState.resources.fear;
+            document.getElementById('day').textContent = gameState.day;
+            document.getElementById('population').textContent = gameState.population;
+            document.getElementById('missing').textContent = gameState.missing;
+            document.getElementById('danger-fill').style.width = Math.min(gameState.danger, 100) + '%';
+            
+            updateTribeList();
+            updateButtons();
+        }
+
+        function updateTribeList() {
+            const tribeList = document.getElementById('tribe-list');
+            tribeList.innerHTML = '';
+            
+            gameState.tribeMembers.forEach(member => {
+                const div = document.createElement('div');
+                div.className = `tribe-member ${member.status}`;
+                div.innerHTML = `<strong>${member.name}</strong> - ${member.job} (${member.status})`;
+                tribeList.appendChild(div);
+            });
+        }
+
+        function updateButtons() {
+            document.getElementById('shelter-btn').disabled = gameState.resources.wood < 10;
+            document.getElementById('wall-btn').disabled = gameState.resources.stone < 15;
+            document.getElementById('ritual-btn').disabled = gameState.resources.food < 5;
+        }
+
+        function addEvent(text, type = 'info') {
+            const eventLog = document.getElementById('event-log');
+            const event = document.createElement('div');
+            event.className = `event ${type}`;
+            event.textContent = `Day ${gameState.day}: ${text}`;
+            eventLog.appendChild(event);
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+
+        function gatherFood() {
+            const gathered = Math.floor(Math.random() * 3) + 1;
+            gameState.resources.food += gathered;
+            addEvent(`Gathered ${gathered} food from the forest edge.`);
+            
+            if (Math.random() < 0.1) {
+                addEvent("The gatherers felt watched while collecting berries...", 'warning');
+                gameState.resources.fear += 1;
+            }
+            updateDisplay();
+        }
+
+        function chopWood() {
+            const chopped = Math.floor(Math.random() * 2) + 1;
+            gameState.resources.wood += chopped;
+            addEvent(`Chopped ${chopped} wood from fallen branches.`);
+            
+            if (Math.random() < 0.15) {
+                addEvent("The axe struck something that bled inside the tree...", 'horror');
+                gameState.resources.fear += 2;
+                gameState.danger += 5;
+            }
+            updateDisplay();
+        }
+
+        function mineStone() {
+            const mined = Math.floor(Math.random() * 2) + 1;
+            gameState.resources.stone += mined;
+            addEvent(`Mined ${mined} stone from the rocky outcrop.`);
+            
+            if (Math.random() < 0.08) {
+                addEvent("Digging revealed bones buried beneath the stones...", 'horror');
+                gameState.resources.fear += 3;
+            }
+            updateDisplay();
+        }
+
+        function buildShelter() {
+            if (gameState.resources.wood >= 10) {
+                gameState.resources.wood -= 10;
+                gameState.shelters++;
+                gameState.danger -= 5;
+                addEvent(`Built a shelter. The tribe feels safer.`);
+                updateDisplay();
+            }
+        }
+
+        function buildWall() {
+            if (gameState.resources.stone >= 15) {
+                gameState.resources.stone -= 15;
+                gameState.walls++;
+                gameState.danger -= 10;
+                addEvent(`Built a defensive wall. Something scratches at it during the night.`, 'warning');
+                updateDisplay();
+            }
+        }
+
+        function sendScouts() {
+            if (gameState.tribeMembers.filter(m => m.status === 'alive').length > 0) {
+                const report = scoutReports[Math.floor(Math.random() * scoutReports.length)];
+                addEvent(report, 'warning');
+                
+                if (Math.random() < 0.3) {
+                    const aliveMember = gameState.tribeMembers.find(m => m.status === 'alive');
+                    if (aliveMember) {
+                        aliveMember.status = 'missing';
+                        gameState.population--;
+                        gameState.missing++;
+                        gameState.danger += 15;
+                        addEvent(`${aliveMember.name} didn't return from scouting...`, 'horror');
+                    }
+                }
+                updateDisplay();
+            }
+        }
+
+        function performRitual() {
+            if (gameState.resources.food >= 5) {
+                gameState.resources.food -= 5;
+                gameState.resources.fear = Math.max(0, gameState.resources.fear - 5);
+                gameState.danger = Math.max(0, gameState.danger - 8);
+                addEvent(`Performed an ancient ritual. The forest seems... quieter.`);
+                updateDisplay();
+            }
+        }
+
+        function randomEvent() {
+            const roll = Math.random();
+            
+            if (roll < 0.3 && gameState.danger > 30) {
+                // Horror event
+                const event = horrorEvents[Math.floor(Math.random() * horrorEvents.length)];
+                addEvent(event, 'horror');
+                gameState.resources.fear += Math.floor(Math.random() * 3) + 1;
+                
+                if (Math.random() < 0.4) {
+                    const aliveMember = gameState.tribeMembers.find(m => m.status === 'alive');
+                    if (aliveMember) {
+                        aliveMember.status = 'missing';
+                        gameState.population--;
+                        gameState.missing++;
+                        addEvent(`${aliveMember.name} has vanished in the night...`, 'horror');
+                    }
+                }
+            } else if (roll < 0.6) {
+                // Resource events
+                const events = [
+                    { text: "Wild berries found near camp.", resource: 'food', amount: 2 },
+                    { text: "A tree falls, providing wood.", resource: 'wood', amount: 3 },
+                    { text: "Strange fruit grows overnight - too risky to eat.", resource: 'fear', amount: 1 }
+                ];
+                
+                const event = events[Math.floor(Math.random() * events.length)];
+                addEvent(event.text);
+                gameState.resources[event.resource] += event.amount;
+            }
+            
+            // Daily resource consumption
+            gameState.resources.food = Math.max(0, gameState.resources.food - gameState.population);
+            if (gameState.resources.food === 0) {
+                addEvent("The tribe is hungry. Morale drops.", 'warning');
+                gameState.resources.fear += 2;
+            }
+            
+            // Increase danger over time
+            gameState.danger += Math.floor(Math.random() * 3) + 1;
+            
+            updateDisplay();
+        }
+
+        function gameLoop() {
+            if (!gameState.gameRunning) return;
+            
+            gameState.day++;
+            randomEvent();
+            
+            // Check win/lose conditions
+            if (gameState.population <= 0) {
+                addEvent("The tribe has been consumed by the forest...", 'horror');
+                gameState.gameRunning = false;
+                return;
+            }
+            
+            if (gameState.day > 50 && gameState.population >= 3) {
+                addEvent("Your tribe has survived the dark forest's hunger!", 'info');
+                gameState.gameRunning = false;
+                return;
+            }
+            
+            setTimeout(gameLoop, 3000); // New day every 3 seconds
+        }
+
+        // Initialize game
+        updateDisplay();
+        gameState.gameRunning = true;
+        gameLoop();
+    </script>
+</body>
+</html>
