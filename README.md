@@ -2,19 +2,18 @@
 
 A browser-based survival horror game where you manage a tribe struggling to survive in a cursed forest that hungers for human souls.
 
-## 🎮 Game Overview
+## Game Overview
 
 Dark Roots is an atmospheric horror survival game where you must keep your tribe alive while facing supernatural threats in a malevolent forest. The trees bleed, the shadows whisper, and something ancient stirs in the depths of the woods.
 
-## 🎯 Objective
+## Objective
 
 Survive as long as possible while managing your tribe's resources, fear levels, and the ever-increasing danger of the cursed forest.
 
-## 🎲 How to Play
+## How to Play
 
 ### Starting the Game
-- Open `index.html` in any modern web browser
-- The game starts automatically with Day 1 and a 2-minute timer
+[Play Here](https://dark-roots.vercel.app/)
 
 ### Resources
 - **Food**: Needed to feed your tribe each day
@@ -41,7 +40,7 @@ Your tribe consists of 5 unique characters:
 
 Each character has unique dialogue that changes based on their fear level and personality.
 
-## 🎭 Game Mechanics
+## Game Mechanics
 
 ### Day/Night Cycle
 - Each day lasts 2 minutes
@@ -67,7 +66,7 @@ Each character has unique dialogue that changes based on their fear level and pe
 - Keep danger below 100
 - Manage food to prevent starvation
 
-## 🎨 Features
+## Features
 
 ### Atmospheric Elements
 - Dynamic horror events with randomized outcomes
@@ -83,7 +82,7 @@ Each character has unique dialogue that changes based on their fear level and pe
 - Escalating tension and danger
 - Multiple ways to fail
 
-## 🛠️ Technical Details
+## Technical Details
 
 ### Requirements
 - Modern web browser (Chrome, Firefox, Safari, Edge)
@@ -102,7 +101,7 @@ dark-roots/
 - No persistent save system
 - Refresh page to restart
 
-## 🎪 Customization
+## Customization
 
 ### Adjusting Difficulty
 You can modify these values in the JavaScript section:
@@ -118,7 +117,7 @@ You can modify these values in the JavaScript section:
 - **Scout Reports**: Add to the `scoutReports` array
 - **Atmospheric Text**: Add to the `atmosphericTexts` array
 
-## 🎮 Game Over Conditions
+## Game Over Conditions
 
 1. **Extinction**: All tribe members die or disappear
 2. **Consumed**: Danger level reaches 100%
